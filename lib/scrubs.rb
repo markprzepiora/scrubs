@@ -102,6 +102,10 @@ def read_line(line)
   scrubtime = array[4].to_i
   path = array[5].rstrip
   Checksum.new(inode, mtime, size, md5, scrubtime, path)
+rescue StandardError => e
+  require 'pp'
+  pp line
+  raise e
 end
 
 def recent_scrubfile_names(names, newer_than_in_days = 7)

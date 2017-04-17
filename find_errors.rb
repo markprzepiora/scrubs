@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative 'lib/functions'
+require_relative 'lib/scrubs'
 
 scrubs = ARGV.map do |name|
   read_scrubfile(name)
