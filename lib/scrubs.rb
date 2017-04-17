@@ -22,6 +22,45 @@ class Checksum < Struct.new(:inode, :mtime, :size, :md5, :scrubtime, :path)
   end
 end
 
+class RecentlyScannedDB
+  def initialize
+    @db = {}
+  end
+
+  def self.load_files(filenames)
+    db = new
+
+    filenames.each do |name|
+      db.load(File.open(name))
+    end
+
+    db
+  end
+
+  # readable - e.g. ARGF or a file
+  def load(readable)
+    readable.each_line do |line|
+      inode, mtime, = line.split(",")
+      add(inode, mtime)
+    end
+  end
+
+  def add(inode, mtime)
+    @db["#{inode}-#{mtime}"] = true
+  end
+
+  def already_scanned?(filename)
+    file = File.open(filename)
+    inode = file.stat.ino
+    mtime = file.mtime.to_i
+    !!@db["#{inode}-#{mtime}"]
+  rescue StandardError => e
+    false
+  ensure
+    file && file.close
+  end
+end
+
 class ScrubDB
   def initialize
     @scrubs = []
@@ -48,6 +87,12 @@ def read_scrubfile(name)
   end
 end
 
+def read_scrubfiles(names)
+  names.map do |name|
+    read_scrubfile
+  end
+end
+
 def read_line(line)
   array = line.split(",", 6)
   inode = array[0].to_i
@@ -59,8 +104,8 @@ def read_line(line)
   Checksum.new(inode, mtime, size, md5, scrubtime, path)
 end
 
-def recent_scrubfile_names(dir, newer_than_in_days = 7)
-  Dir.glob(dir + "/*.scrubfile").select do |name|
+def recent_scrubfile_names(names, newer_than_in_days = 7)
+  names.select do |name|
     File.ctime(name) > Time.now - 60*60*24*newer_than_in_days
   end
 end
