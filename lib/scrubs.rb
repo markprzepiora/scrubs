@@ -44,27 +44,11 @@ end
 
 def read_scrubfile(name)
   File.open(name).each_line.map do |line|
-    read_line_v1(line)
+    read_line(line)
   end
 end
 
-def read_scrubfile_v2(name)
-  File.open(name).each_line.map do |line|
-    read_line_v2(line)
-  end
-end
-
-def read_line_v1(line)
-  array = line.split(",", 5)
-  inode = array[0].to_i
-  mtime = array[1].to_i
-  md5 = array[2]
-  scrubtime = array[3].to_i
-  path = array[4].rstrip
-  Checksum.new(inode, mtime, nil, md5, scrubtime, path)
-end
-
-def read_line_v2(line)
+def read_line(line)
   array = line.split(",", 6)
   inode = array[0].to_i
   mtime = array[1].to_i
@@ -73,4 +57,10 @@ def read_line_v2(line)
   scrubtime = array[4].to_i
   path = array[5].rstrip
   Checksum.new(inode, mtime, size, md5, scrubtime, path)
+end
+
+def recent_scrubfile_names(dir, newer_than_in_days = 7)
+  Dir.glob(dir + "/*.scrubfile").select do |name|
+    File.ctime(name) > Time.now - 60*60*24*newer_than_in_days
+  end
 end

@@ -3,7 +3,7 @@
 require_relative 'lib/functions'
 
 scrubs = ARGV.map do |name|
-  read_scrubfile_v2(name)
+  read_scrubfile(name)
 end.flatten
 
 scrub_db = ScrubDB.new

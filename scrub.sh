@@ -20,6 +20,6 @@ scrubs_dir="$3"
 
 mkdir -p "$scrubs_dir"
 
-scrubfile="$scrubs_dir"/"$prefix"--$(date '+%Y-%m-%d--%H-%M-%S--%N').scrubfile
+scrubfile="$scrubs_dir"/"$prefix"--$(date '+%Y-%m-%d--%H-%M-%S--%s').scrubfile
 
 find "$scan_dir"/ -type f -not -path '*/.rsync_shadow/*' -print0 | xargs -0 "$PROGDIR"/scrub.rb | tee "$scrubfile"
